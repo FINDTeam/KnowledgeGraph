@@ -10,6 +10,8 @@ import spacy
 from tqdm import tqdm
 from spacy.matcher import Matcher
 import pandas as pd
+import networkx as nx
+import matplotlib.pyplot as plt
 
 
 
@@ -109,7 +111,25 @@ def get_relations(sentence):
     
     span= doc[matches[k][1]:matches[k][2]]
     return(span.text)
+
+
+def plot_graph():
+    source=[]
+    target=[]
+    for a,b in entity_pairs:
+        source.append(a)
+        target.append(b)
+    kg_df=pd.DataFrame({'source':source,'target':target,'edge':relations})
+    G=nx.from_pandas_edgelist(kg_df, "source", "target",edge_attr=True, create_using=nx.MultiDiGraph())
+   
+    plt.figure(figsize=(12,12))
+    pos = nx.spring_layout(G)
+    nx.draw(G, with_labels=True, node_color='skyblue', edge_cmap=plt.cm.Blues, pos = pos)
+    plt.show()
     
+
+
+
 export_to_csv()
 collected_data= improt_data()
 
@@ -117,6 +137,11 @@ collected_data= improt_data()
 entity_pairs=[]
 for i in tqdm(collected_data['Sentence'][4:12]):
     entity_pairs.append(get_entities(i))
-    
- 
+
 relations=[get_relations(x) for x in tqdm(collected_data['Sentence'][4:12])]
+pd.Series(relations).value_counts()[:50]
+
+plot_graph()
+
+
+
