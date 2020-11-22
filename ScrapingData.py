@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 import spacy
 from tqdm import tqdm
 from spacy.matcher import Matcher
+import pandas as pd
+
 
 
 
@@ -33,6 +35,17 @@ def process_for_sentences(scraped_text):
     '''for sentence in sentences:
          print(sentence)'''
     return sentences
+
+
+def export_to_csv(x=process_for_sentences(scrape_text_data())):
+    dict={'Sentence':x}
+    df=pd.DataFrame(dict)
+    df.to_csv('Sentences.csv', index=False)
+
+def improt_data():
+    sentences_lists = pd.read_csv('Sentences.csv')
+    sentences_lists.shape
+    return sentences_lists
 
 
 def get_entities(sentence):
@@ -97,19 +110,13 @@ def get_relations(sentence):
     span= doc[matches[k][1]:matches[k][2]]
     return(span.text)
     
+export_to_csv()
+collected_data= improt_data()
 
 
-
-texts=scrape_text_data()
-sentences_lists=process_for_sentences(texts)
-
-
-entities_pair = []
-for sentence in tqdm(sentences_lists):
-    entities_pair.append(get_entities(sentence.text))
+entity_pairs=[]
+for i in tqdm(collected_data['Sentence'][4:12]):
+    entity_pairs.append(get_entities(i))
     
-    ## print(get_entities(sentence.text))
-    
-    
-    
-
+ 
+relations=[get_relations(x) for x in tqdm(collected_data['Sentence'][4:12])]
